@@ -1,22 +1,26 @@
-# Step 1: Build the Flutter web app
+# Stage 1: Build the Flutter web app
 FROM cirrusci/flutter:latest AS build
 
+# Set the working directory
 WORKDIR /app
-COPY . .
 
-# Get Flutter dependencies
+# Copy the pubspec.yaml and install dependencies
+COPY pubspec.yaml pubspec.lock ./
 RUN flutter pub get
 
-# Build the web app
+# Copy the rest of the app code
+COPY . .
+
+# Build the Flutter web app
 RUN flutter build web
 
-# Step 2: Serve the web app using Nginx
+# Stage 2: Serve the app using Nginx
 FROM nginx:alpine
 
-# Copy the built web app from the previous stage
+# Copy the built files from the previous stage
 COPY --from=build /app/build/web /usr/share/nginx/html
 
-# Expose port 80
+# Expose the default Nginx port
 EXPOSE 80
 
 # Start Nginx
